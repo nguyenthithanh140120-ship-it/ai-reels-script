@@ -494,6 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
+                console.log('Phản hồi từ Server:', response.status);
 
                 if (!response.ok) {
                     const errorText = await response.text();

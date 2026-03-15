@@ -1,10 +1,4 @@
 {
-  "version": 2,
-  "functions": {
-    "api/chat.js": {
-      "runtime": "vercel-nodejs@20"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/chat",
