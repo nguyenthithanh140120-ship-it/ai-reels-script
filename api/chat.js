@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
@@ -44,36 +46,22 @@ YÊU CẦU ĐẦU RA:
 }`;
 
     try {
-        console.log("===> Bắt đầu gọi Gemini API...");
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 1200,
-                }
-            })
+        console.log("===> Bắt đầu gọi Gemini API qua SDK...");
+        const genAI = new GoogleGenerativeAI(API_KEY);
+        // Cập nhật tên model đúng như yêu cầu: gemini-1.5-flash
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const result = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1200,
+            }
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('======> Gemini API FETCH FAILED <======');
-            console.error('HTTP Status:', response.status);
-            console.error('Error Body:', errorText);
-            return res.status(response.status).json({ error: 'Lỗi khi gọi AI. Có thể do API Key hoặc tham số không đúng.', details: errorText });
-        }
-
-        const data = await response.json();
-        
-        if (!data.candidates || data.candidates.length === 0) {
-            return res.status(500).json({ error: 'Không nhận được kết quả từ AI' });
-        }
-
-        let rawText = data.candidates[0].content.parts[0].text.trim();
+        const response = await result.response;
+        let rawText = response.text().trim();
+        console.log("===> Đã nhận API Response từ Gemini.");
         
         // Loại bỏ markdown JSON nếu có
         if (rawText.startsWith('```json')) {
@@ -91,6 +79,6 @@ YÊU CẦU ĐẦU RA:
         }
     } catch (error) {
         console.error('Server execution error:', error.message);
-        return res.status(500).json({ error: 'Lỗi server nội bộ' });
+        return res.status(500).json({ error: 'Lỗi server nội bộ chi tiết: ' + error.message });
     }
 }
