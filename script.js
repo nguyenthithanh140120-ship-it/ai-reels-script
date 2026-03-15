@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hashtagList = document.getElementById('hashtag-list');
     const bgmBox = document.getElementById('bgm-recommendation');
     const ctaContent = document.getElementById('cta-content');
-    const errorBox = document.getElementById('error-message');
+    const errorBox = document.getElementById('api-error');
 
     // Custom Style Elements
     const styleOtherCheckbox = document.getElementById('style-other-checkbox');
