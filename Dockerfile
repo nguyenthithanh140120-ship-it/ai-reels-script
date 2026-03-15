@@ -1,14 +1,18 @@
-# Sử dụng lightweight Nginx image làm base
-FROM nginx:alpine
+# Sử dụng Node.js 18+ Alpine làm base
+FROM node:18-alpine
 
-# Xóa nội dung mặc định của Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Set working directory
+WORKDIR /app
 
-# Copy toàn bộ mã nguồn vào thư mục public của Nginx
-COPY . /usr/share/nginx/html/
+# Copy package.json và cài đặt dependencies
+COPY package*.json ./
+RUN npm install
 
-# Expose port 80 cho web server
-EXPOSE 80
+# Copy toàn bộ mã nguồn
+COPY . .
 
-# Chạy Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Expose port 8080
+EXPOSE 8080
+
+# Chạy server Node.js
+CMD ["node", "server.js"]

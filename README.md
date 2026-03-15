@@ -12,23 +12,33 @@ Dựa trên Công nghệ Google Gemini AI, ứng dụng cung cấp:
 > 🌐 **[Link Deploy Vercel (Thêm link sau khi deploy)]** 
 
 ## 3. Hướng dẫn chạy ứng dụng cục bộ (Local)
-Dự án được xây dựng hoàn toàn bằng HTML, CSS (Vanilla) và JavaScript (Vanilla) giao tiếp trực tiếp với Gemini API. Do đó việc chạy mã cục bộ rất đơn giản:
-1. Tải toàn bộ mã nguồn (`index.html`, `style.css`, `script.js`).
-2. Mở file `index.html` trực tiếp bằng bất kỳ trình duyệt web hiện đại nào (Chrome, Edge, Safari,...).
-3. Hoặc sử dụng Live Server Extension trên VS Code: Chuột phải vào file `index.html` -> Chọn **"Open with Live Server"**.
+Do ứng dụng gọi API qua Server Backend (để bảo mật API Key tránh lộ trên Frontend), bạn cần cài NodeJS để chạy ứng dụng:
+
+1. Phải cài đặt [Node.js](https://nodejs.org/) (phiên bản 18 trở lên).
+2. Tạo file tên `.env` tại thư mục gốc của project (cùng chỗ với file `package.json`). Viết đoạn code sau vào trong file `.env`:
+   ```env
+   GEMINI_API_KEY=AIzaSyA_... (thêm đoạn mã API của bạn vào đây)
+   ```
+3. Mở Terminal tại thư mục project và chạy 2 lệnh sau:
+   ```bash
+   npm install
+   npm start
+   ```
+4. Khi chạy xong, mở trình duyệt web truy cập: **`http://localhost:8080/index.html`**
+
+*(Chú ý: Không dùng tính năng Live Server hay mở file HTML trực tiếp được nữa, vì chúng không thể chạy code API của Server.)*
 
 ## 4. Hướng dẫn Build và Chạy Docker Image
-Dự án được cấu hình sẵn để đóng gói chạy thông qua Docker với `NGINX` server.
+Dự án đã cấu hình đầy đủ để đóng gói toàn bộ Frontend và Backend Node.js qua Docker.
 
 **Các bước chạy với Docker Desktop:**
-1. Cài đặt và bật ứng dụng **Docker Desktop**.
-2. Mở Terminal / PowerShell / Command Prompt tại thư mục gốc chứa project (Nơi có file `Dockerfile`).
-3. Chạy lệnh sau để Docker Compose tự động Build image và Start container:
+1. Đảm bảo bạn đã có file `.env` và API Key bên trong (như hướng dẫn số 3 ở trên). Môi trường Docker Compose tự động lấy key từ `.env`.
+2. Bật ứng dụng **Docker Desktop**.
+3. Mở Terminal tại thư mục gốc chứa project và gõ:
    ```bash
    docker-compose up -d --build
    ```
 4. Mở trình duyệt và truy cập vào địa chỉ: **`http://localhost:8080`** 
-*(Chú ý: Nếu port 8080 bị trùng, có thể đổi port trong file `docker-compose.yml` theo cấu trúc `"port_ngoài:80"`)*.
 
 **Cách Tắt/Dừng Docker Container:**
 ```bash
