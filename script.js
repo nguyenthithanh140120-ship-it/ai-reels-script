@@ -496,18 +496,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    let errorMsg = `Lỗi API (status ${response.status})`;
+                    let errorMsg = `Lỗi HTTP ${response.status}: `;
+
+                    if (response.status === 404) {
+                        errorMsg += "Không tìm thấy endpoint /api/chat (Lỗi 404 - Vercel chưa nhận diện được Serverless Function).";
+                    } else if (response.status === 500) {
+                        errorMsg += "Lỗi Internal Server Error (Lỗi 500 - API Key sai hoặc server chat.js gặp lỗi xử lý).";
+                    } else {
+                        errorMsg += "Chi tiết lỗi nằm ở console.log.";
+                    }
 
                     try {
                         const errorJson = JSON.parse(errorText);
                         if (errorJson.error && errorJson.error.message) {
-                            errorMsg = errorJson.error.message;
+                            errorMsg += ` - ${errorJson.error.message}`;
+                        } else if (errorJson.error) {
+                            errorMsg += ` - ${errorJson.error}`;
                         } else if (errorJson.message) {
-                            errorMsg = errorJson.message;
+                            errorMsg += ` - ${errorJson.message}`;
                         }
                     } catch (e) {
-                        // Không parse được JSON, dùng nguyên văn
-                        if (errorText) errorMsg = errorText;
+                        // Không parse được JSON, in thêm nguyên văn text nếu có
+                        if (errorText) errorMsg += ` - RAW: ${errorText}`;
                     }
 
                     if (response.status === 429) {

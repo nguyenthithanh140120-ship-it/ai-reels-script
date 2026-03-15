@@ -44,6 +44,7 @@ YÊU CẦU ĐẦU RA:
 }`;
 
     try {
+        console.log("===> Bắt đầu gọi Gemini API...");
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: {
@@ -60,8 +61,10 @@ YÊU CẦU ĐẦU RA:
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Gemini API Error:', errorText);
-            return res.status(response.status).json({ error: 'Lỗi khi gọi AI. Hãy thử lại sau.' });
+            console.error('======> Gemini API FETCH FAILED <======');
+            console.error('HTTP Status:', response.status);
+            console.error('Error Body:', errorText);
+            return res.status(response.status).json({ error: 'Lỗi khi gọi AI. Có thể do API Key hoặc tham số không đúng.', details: errorText });
         }
 
         const data = await response.json();
