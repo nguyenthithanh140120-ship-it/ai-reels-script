@@ -35,8 +35,14 @@ Dự án được cấu hình sẵn để đóng gói chạy thông qua Docker v
 docker-compose down
 ```
 
-## 5. Lưu ý về API Key của AI Studio
-🔑 **API Key Gemini AI (`script.js: Lòng 1`) hiện đang được gắn cứng/hardcode trong giao diện Frontend.** 
-Theo yêu cầu đề bài môn học: Đây là thiết lập cho **Mục Đích Thực Hành**.
+## 5. Bảo mật API Key với Vercel Serverless Functions
+🔑 **API Key Gemini AI đã được bảo mật hoàn toàn.**
+Ứng dụng sử dụng **Vercel Serverless Functions** (`/api/generate.js`) làm proxy server phân giải. Frontend (`script.js`) sẽ gọi yêu cầu đến Backend nội bộ `/api/generate`, và Backend sẽ lấy biến môi trường `GEMINI_API_KEY` để giao tiếp với Google AI Studio một cách an toàn.
 
-*Trong môi trường Production thực tế, API Key hoàn toàn không được đặt tại phía Client (JS) để tránh lỗi bảo mật. Thay vào đó, API cần gọi đến một Backend Node.js/Python server, và Server này sẽ lưu API Key dưới dạng biến môi trường (`.env`), sau đó chuyển tiếp kết quả từ AI Engine xuống lại Client.*
+**Cách thiết lập trên Vercel:**
+1. Đưa mã nguồn lên GitHub.
+2. Tại Vercel Dashboard, chọn **Import Project**.
+3. Trong phần **Environment Variables**, thêm biến:
+   - Key: `GEMINI_API_KEY`
+   - Value: `[API_KEY_CỦA_BẠN]`
+4. Bấm **Deploy**.

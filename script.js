@@ -1,5 +1,3 @@
-const API_KEY = "AIzaSyA_q-eTq_IjgjTSw-K6tg64AHv0BNdkx2c";
-
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const form = document.getElementById('script-form');
@@ -460,43 +458,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Gọi API Google Gemini
+     * Gọi API qua Backend (Vercel Serverless Function)
      */
     async function generateScriptAPI(product, message, audience, duration, actors, style) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+        const payload = { product, message, audience, duration, actors, style };
 
-        const systemPrompt = `Bạn là một chuyên gia sáng tạo nội dung (Content Creator) triệu view trên TikTok và Reels. 
-        Khi nhận được chủ đề, xây dựng kịch bản chú trọng đến phong cách cụ thể yêu cầu.
-        
-        OUTPUT CHÍNH XÁC CHUẨN JSON MÀ KHÔNG CÓ BACKTICKS HAY TEXT:
-        {
-            "hook": "Câu mở đầu gây chú ý 0-3s (kích thích người xem)",
-            "timeline": [
-                {
-                    "time": "Mốc thời gian (VD: 03-08s)",
-                    "visual": "Mô tả hình ảnh bối cảnh chi tiết",
-                    "dialogue": "Lời thoại hoặc phụ đề (Ngữ điệu...)"
-                }
-            ],
-            "captions": ["Caption mẫu 1", "Caption mẫu 2"],
-            "hashtags": ["#hashtag1", "#hashtag2"],
-            "bgm": "Mô tả nhạc nền (Trend...)",
-            "cta": "Câu Kêu gọi hành động ấn tượng cuối clip"
-        }`;
-
-        const userPrompt = `Hãy tạo kịch bản video:
-        - Sản phẩm: ${product}
-        - Điểm nổi bật / Thông điệp: ${message}
-        - Đối tượng người xem: ${audience}
-        - Thời lượng chốt: ${duration}
-        - Số diễn viên: ${actors}
-        - Phong cách kết hợp: ${style}`;
-
-        const payload = {
-            contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }]
-        };
-
-        const response = await fetch(url, {
+        const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -504,18 +471,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!response.ok) {
             let errorText = await response.text();
-            try { errorText = JSON.parse(errorText).error.message; } catch(e) {}
-            throw new Error(errorText);
+            try { 
+                const errorJson = JSON.parse(errorText); 
+                errorText = errorJson.error;
+            } catch(e) {}
+            throw new Error(errorText || "Lỗi khi gọi API Backend nội bộ.");
         }
 
-        const data = await response.json();
-        let textResponse = data.candidates[0].content.parts[0].text;
-        
-        const jsonStart = textResponse.indexOf('{');
-        const jsonEnd = textResponse.lastIndexOf('}');
-        if (jsonStart === -1) throw new Error("Không tìm thấy JSON.");
-        
-        return JSON.parse(textResponse.substring(jsonStart, jsonEnd + 1));
+        return await response.json();
     }
 
     /**
