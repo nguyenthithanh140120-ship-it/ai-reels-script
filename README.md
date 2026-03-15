@@ -9,7 +9,7 @@ Dựa trên Công nghệ Google Gemini AI, ứng dụng cung cấp:
 - Giao diện (UI/UX) tối ưu hóa trải nghiệm mượt mà, hỗ trợ Responsive và chuẩn Accessibility. Tích hợp tính năng Copy Nhanh cho nội dung đầu ra.
 
 ## 2. Link Ứng dụng trên Vercel
-> 🌐 **[Link Deploy Vercel (Thêm link sau khi deploy)]** 
+> https://ai-reels-script.vercel.app 
 
 ## 3. Hướng dẫn chạy ứng dụng cục bộ (Local)
 Do ứng dụng gọi API qua Server Backend (để bảo mật API Key tránh lộ trên Frontend), bạn cần cài NodeJS để chạy ứng dụng:
@@ -19,6 +19,7 @@ Do ứng dụng gọi API qua Server Backend (để bảo mật API Key tránh l
    ```env
    GEMINI_API_KEY=AIzaSyA_... (thêm đoạn mã API của bạn vào đây)
    ```
+   > ✅ **Lưu ý:** mỗi khi bạn đổi API Key trong `.env`, hãy **dừng server và khởi động lại** để thay đổi có hiệu lực.
 3. Mở Terminal tại thư mục project và chạy 2 lệnh sau:
    ```bash
    npm install
@@ -45,9 +46,24 @@ Dự án đã cấu hình đầy đủ để đóng gói toàn bộ Frontend và
 docker-compose down
 ```
 
-## 5. Bảo mật API Key với Vercel Serverless Functions
+## 5. Bảo mật API Key với Node.js Backend
 🔑 **API Key Gemini AI đã được bảo mật hoàn toàn.**
-Ứng dụng sử dụng **Vercel Serverless Functions** (`/api/generate.js`) làm proxy server phân giải. Frontend (`script.js`) sẽ gọi yêu cầu đến Backend nội bộ `/api/generate`, và Backend sẽ lấy biến môi trường `GEMINI_API_KEY` để giao tiếp với Google AI Studio một cách an toàn.
+Ứng dụng sử dụng **Node.js/Express server** (`server.js`) làm proxy server phân giải. Frontend (`script.js`) sẽ gọi yêu cầu đến Backend nội bộ `/api/generate`, và Backend sẽ lấy biến môi trường `GEMINI_API_KEY` từ file `.env` để giao tiếp với Google AI Studio một cách an toàn.
+
+**Cơ chế bảo mật:**
+- API Key được lưu trong file `.env` (đã được thêm vào `.gitignore`)
+- Frontend chỉ gọi API nội bộ, không lộ API Key ra bên ngoài
+- Server backend xử lý việc gọi Google API và trả kết quả về frontend
+- Khi F12 trên trình duyệt, chỉ thấy request đến `/api/generate` - không tìm thấy API Key
+
+> ⚠️ Nếu bạn gặp thông báo “Your API key was reported as leaked” hoặc “API key expired”, hãy thực hiện các bước sau:
+>
+> 1. **Tạo API Key mới** (không đăng public ở nơi nào). Key đã bị lộ sẽ nhanh chóng bị Google gắn cờ và vô hiệu.
+> 2. **Bật Billing + Enable API**:
+>    - Trong Google Cloud Console, đảm bảo **Billing đã bật** cho dự án.
+>    - Vào **APIs & Services > Library** và bật **Generative Language API** (hoặc tên tương tự).
+> 3. **Không giới hạn key** (hoặc chỉ giới hạn theo domain/người dùng nếu bạn biết rõ). Nếu key bị giới hạn sai, Google có thể trả lỗi “expired/invalid”.
+> 4. Cập nhật lại file `.env` (hoặc biến môi trường) và **khởi động lại server**.
 
 **Cách thiết lập trên Vercel:**
 1. Đưa mã nguồn lên GitHub.

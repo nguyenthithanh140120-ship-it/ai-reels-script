@@ -1,14 +1,21 @@
 {
-  "name": "ai-script-generator",
+  "name": "tiktok-script-generator",
   "version": "1.0.0",
-  "description": "AI Script Generator with Express Backend",
+  "description": "TikTok Script Generator with secure API proxy",
   "main": "server.js",
-  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "C:\\PROGRA~1\\nodejs\\node.exe server.js",
+    "dev": "C:\\PROGRA~1\\nodejs\\node.exe server.js"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2"
-  }
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["tiktok", "script", "generator", "ai", "gemini"],
+  "author": "",
+  "license": "ISC"
 }

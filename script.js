@@ -116,6 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Validation State Tracking
     let currentValidStep = 0; // 0 to 5
+    let isSubmitting = false; // Throttling state
+    let lastSubmitTime = 0; // Delay tracking
 
     // Initialize
     bindEvents();
@@ -427,6 +429,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const actors = steps[4].element.value + ' người';
         const style = getSelectedStyles().join(', ');
 
+        const now = Date.now();
+        if (isSubmitting || now - lastSubmitTime < 3000) {
+            errorBox.innerHTML = `⚠️ Vui lòng đợi 3 giây trước tạo kịch bản mới.`;
+            errorBox.classList.remove('hidden');
+            return;
+        }
+
+        isSubmitting = true;
+        lastSubmitTime = now;
+
         // Reset & Show Loading
         errorBox.classList.add('hidden');
         resultSection.classList.add('hidden');
@@ -451,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errorBox.innerHTML = `❌ ${error.message || "Lỗi khi gọi AI. Hãy thử lại."}`;
             errorBox.classList.remove('hidden');
         } finally {
+            isSubmitting = false;
             submitBtn.disabled = false;
             btnText.textContent = "🚀 TẠO KỊCH BẢN NGAY (Hoàn thành form)";
             loader.classList.add('hidden');
@@ -458,27 +471,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Gọi API qua Backend (Vercel Serverless Function)
+     * Gọi API nội bộ để tạo script
      */
     async function generateScriptAPI(product, message, audience, duration, actors, style) {
-        const payload = { product, message, audience, duration, actors, style };
+        const requestBody = {
+            product,
+            message,
+            audience,
+            duration,
+            actors,
+            style
+        };
 
-        const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        const maxRetries = 2; // Thử lại tối đa 2 lần thêm (tổng 3 lần gọi)
+        let attempt = 0;
 
-        if (!response.ok) {
-            let errorText = await response.text();
-            try { 
-                const errorJson = JSON.parse(errorText); 
-                errorText = errorJson.error;
-            } catch(e) {}
-            throw new Error(errorText || "Lỗi khi gọi API Backend nội bộ.");
+        while (attempt <= maxRetries) {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMsg = `Lỗi API (status ${response.status})`;
+
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.error && errorJson.error.message) {
+                            errorMsg = errorJson.error.message;
+                        } else if (errorJson.message) {
+                            errorMsg = errorJson.message;
+                        }
+                    } catch (e) {
+                        // Không parse được JSON, dùng nguyên văn
+                        if (errorText) errorMsg = errorText;
+                    }
+
+                    if (response.status === 429) {
+                        if (attempt < maxRetries) {
+                            attempt++;
+                            console.warn(`⏳ Quota exceeded (429). Retrying attempt ${attempt} in 3 seconds...`);
+                            btnText.textContent = `ĐANG THỬ LẠI LẦN ${attempt}...`;
+                            await new Promise(r => setTimeout(r, 3000)); // 3 giây delay
+                            continue; // Retry lại vòng lặp
+                        }
+                    }
+
+                    throw new Error(errorMsg);
+                }
+
+                const result = await response.json();
+                return result;
+
+            } catch (err) {
+                // If it's the last attempt, or it's not a quota error handled inside the loop, throw it.
+                if (attempt >= maxRetries || !err.message.includes('Quota')) {
+                    throw err; 
+                }
+            }
         }
-
-        return await response.json();
     }
 
     /**
