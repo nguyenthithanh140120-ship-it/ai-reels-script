@@ -1,24 +1,36 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 module.exports = async function handler(req, res) {
+    // CORS Headers
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+    // Handle OPTIONS request
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { product, message, audience, duration, actors, style } = req.body;
+    try {
+        const { product, message, audience, duration, actors, style } = req.body;
 
-    if (!product || !message || !audience || !duration || !actors || !style) {
-        return res.status(400).json({ error: 'Thiếu thông tin yêu cầu' });
-    }
+        if (!product || !message || !audience || !duration || !actors || !style) {
+            return res.status(400).json({ error: 'Thiếu thông tin yêu cầu' });
+        }
 
-    const API_KEY = process.env.GEMINI_API_KEY;
-    
-    if (!API_KEY) {
-        console.error("Thiếu biến môi trường GEMINI_API_KEY");
-        return res.status(500).json({ error: 'Lỗi cấu hình server' });
-    }
+        const API_KEY = process.env.GEMINI_API_KEY;
+        
+        if (!API_KEY) {
+            console.error("Thiếu biến môi trường GEMINI_API_KEY");
+            return res.status(500).json({ error: 'Lỗi cấu hình server' });
+        }
 
-    const prompt = `Bạn là một chuyên gia biên kịch video ngắn (TikTok, Reels, Shorts) xuất sắc.
+        const prompt = `Bạn là một chuyên gia biên kịch video ngắn (TikTok, Reels, Shorts) xuất sắc.
 Hãy viết một kịch bản video chi tiết dựa trên các thông tin sau:
 - Sản phẩm/Dịch vụ: ${product}
 - Thông điệp chính: ${message}
@@ -45,40 +57,45 @@ YÊU CẦU ĐẦU RA:
   "cta": "Lời kêu gọi hành động cuối video"
 }`;
 
-    try {
-        console.log("===> Bắt đầu gọi Gemini API qua SDK...");
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        // Cập nhật tên model đúng như yêu cầu: gemini-2.0-flash
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1200,
-            }
-        });
-
-        const response = await result.response;
-        let rawText = response.text().trim();
-        console.log("===> Đã nhận API Response từ Gemini.");
-        
-        // Loại bỏ markdown JSON nếu có
-        if (rawText.startsWith('```json')) {
-            rawText = rawText.replace(/^```json/, '').replace(/```$/, '').trim();
-        } else if (rawText.startsWith('```')) {
-            rawText = rawText.replace(/^```/, '').replace(/```$/, '').trim();
-        }
-
         try {
-            const parsedData = JSON.parse(rawText);
-            return res.status(200).json(parsedData);
-        } catch (parseError) {
-            console.error('Error parsing JSON from Gemini:', rawText);
-            return res.status(500).json({ error: 'Kết quả từ AI không đúng định dạng JSON' });
+            console.log("===> Bắt đầu gọi Gemini API qua SDK...");
+            const genAI = new GoogleGenerativeAI(API_KEY);
+            // Cập nhật tên model đúng như yêu cầu: gemini-2.0-flash
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1200,
+                }
+            });
+
+            const response = await result.response;
+            let rawText = response.text().trim();
+            console.log("===> Đã nhận API Response từ Gemini.");
+            
+            // Loại bỏ markdown JSON nếu có
+            if (rawText.startsWith('```json')) {
+                rawText = rawText.replace(/^```json/, '').replace(/```$/, '').trim();
+            } else if (rawText.startsWith('```')) {
+                rawText = rawText.replace(/^```/, '').replace(/```$/, '').trim();
+            }
+
+            try {
+                const parsedData = JSON.parse(rawText);
+                return res.status(200).json(parsedData);
+            } catch (parseError) {
+                console.error('Error parsing JSON from Gemini:', rawText);
+                return res.status(500).json({ error: 'Kết quả từ AI không đúng định dạng JSON' });
+            }
+        } catch (apiError) {
+            console.error('Gemini API Error:', apiError);
+            return res.status(500).json({ error: 'Lỗi khi gọi AI. Có thể do API Key hoặc tham số không đúng.', details: apiError.message });
         }
+
     } catch (error) {
-        console.error('Server execution error:', error.message);
-        return res.status(500).json({ error: 'Lỗi server nội bộ chi tiết: ' + error.message });
+        console.error('Lỗi tổng quát xử lý request:', error);
+        return res.status(500).json({ error: 'Lỗi server nội bộ. Chi tiết: ' + (error.message || 'Unknown Error') });
     }
 }
