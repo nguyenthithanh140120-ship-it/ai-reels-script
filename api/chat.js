@@ -1,6 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 module.exports = async function handler(req, res) {
+    console.log("Check Key:", process.env.GEMINI_API_KEY ? "OK" : "MISSING");
     // CORS Headers
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -60,7 +61,7 @@ YÊU CẦU ĐẦU RA:
 
         try {
             console.log("===> Bắt đầu gọi Gemini API qua SDK...");
-            const genAI = new GoogleGenerativeAI(API_KEY);
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             // Cập nhật tên model đúng như yêu cầu: gemini-1.5-flash
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
