@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.static('.')); // Serve static files from current directory
 
 // API endpoint to generate script
-app.post('/api/generate', async (req, res) => {
+app.post('/api/chat', async (req, res) => {
     try {
         const { product, message, audience, duration, actors, style } = req.body;
 
