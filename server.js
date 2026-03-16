@@ -27,67 +27,126 @@ app.post('/api/generate', async (req, res) => {
 
         // Reload .env on every request so updating the key does not require restarting the server.
         dotenv.config({ override: true });
-        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-        if (!GEMINI_API_KEY) {
-            return res.status(500).json({ error: { message: 'API Key không được cấu hình' } });
+        const GROQ_API_KEY = process.env.GROQ_API_KEY;
+        console.log("Groq key loaded:", GROQ_API_KEY ? "YES" : "NO");
+
+        if (!GROQ_API_KEY) {
+            console.error("GROQ_API_KEY không tồn tại trong .env");
+            process.exit(1);
         }
 
-        const prompt = `Bạn là một chuyên gia sáng tạo kịch bản video ngắn (TikTok/Reels/Shorts).
-Hãy tạo một kịch bản video chi tiết dựa trên các thông tin sau:
-- Sản phẩm/Dịch vụ: ${product}
-- Thông điệp chính: ${message}
-- Đối tượng khán giả: ${audience}
-- Thời lượng: ${duration}
-- Số lượng diễn viên: ${actors}
-- Phong cách: ${style}
+        const prompt = `Hãy đóng vai **chuyên gia sáng tạo nội dung TikTok/Reels viral** với kinh nghiệm marketing và storytelling.
 
-YÊU CẦU BẮT BUỘC:
-Chỉ trả về MỘT chuỗi JSON (KHÔNG bọc trong markdown \`\`\`json hay bất kỳ văn bản nào khác). Cấu trúc JSON phải chính xác như sau:
+Tạo một **kịch bản video ngắn cực kỳ hấp dẫn, gây tò mò và có khả năng viral cao** dựa trên thông tin sau:
+
+* Sản phẩm/Dịch vụ: ${product}
+* Thông điệp chính: ${message}
+* Đối tượng khán giả: ${audience}
+* Thời lượng: ${duration}
+* Số diễn viên: ${actors}
+* Phong cách: ${style}
+
+YÊU CẦU CHẤT LƯỢNG CAO:
+
+1. **Hook 0–3s phải gây sốc, tò mò hoặc chạm nỗi đau người xem**
+   * dùng câu hỏi, so sánh bất ngờ, hoặc tình huống gây tranh cãi nhẹ.
+
+2. **Timeline phải có storytelling**
+   * mở đầu: vấn đề
+   * giữa: giải pháp / cao trào
+   * cuối: kết quả bất ngờ hoặc cảm xúc mạnh.
+
+3. **Visual mô tả chi tiết**
+   * góc máy
+   * biểu cảm
+   * hành động
+   * text trên màn hình.
+
+4. **Dialogue tự nhiên như nói chuyện ngoài đời**, không quá quảng cáo.
+
+5. **Caption phải viral**
+   * ngắn
+   * kích thích comment
+   * có yếu tố cảm xúc.
+
+6. **Hashtag**
+   * 5–8 hashtag
+   * kết hợp:
+     * hashtag trending
+     * hashtag niche
+     * hashtag viral TikTok.
+
+7. **Nhạc nền**
+   * đề xuất nhạc đang trend hoặc vibe phù hợp.
+
+8. **CTA tự nhiên**
+   * không quá quảng cáo
+   * khuyến khích người xem thử hoặc tìm hiểu.
+
+BẮT BUỘC:
+Chỉ trả về JSON đúng format (KHÔNG bọc trong markdown hay bất kỳ văn bản nào khác):
+
 {
-  "hook": "Câu Hook thu hút (0-3s đầu)",
+  "hook": "...",
   "timeline": [
     {
       "time": "0s - 3s",
-      "visual": "Mô tả hình ảnh/góc máy/hành động",
-      "dialogue": "Lời thoại hoặc text trên màn hình"
+      "visual": "...",
+      "dialogue": "..."
     }
   ],
-  "captions": ["Gợi ý caption 1", "Gợi ý caption 2"],
-  "hashtags": ["#hashtag1", "#hashtag2", "#hashtag3"],
-  "bgm": "Tên bài hát / Thể loại nhạc nền phù hợp",
-  "cta": "Câu kêu gọi hành động (Call To Action)"
+  "captions": [],
+  "hashtags": [],
+  "bgm": "...",
+  "cta": "..."
 }`;
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
         const requestBody = {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 2000,
-            }
+            model: "llama-3.1-8b-instant",
+            messages: [
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            temperature: 0.7
         };
 
         const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${GROQ_API_KEY}`
+            },
             body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            const rawMessage = errorData?.error?.message || errorData?.message || 'Lỗi khi gọi Google API';
+            const errorText = await response.text();
+            console.log("Groq API error:", errorText);
+
+            let rawMessage = 'Lỗi khi gọi Groq API';
+            try {
+                const errorData = JSON.parse(errorText);
+                rawMessage = errorData?.error?.message || errorData?.message || rawMessage;
+            } catch (e) {
+                // If not JSON, use raw text
+                rawMessage = errorText;
+            }
+
             const lower = rawMessage.toLowerCase();
 
-            // Nếu key đã bị Google báo expired/leaked, trả về mã 401 với hướng dẫn rõ ràng
-            if (lower.includes('api key expired') || lower.includes('api key invalid') || lower.includes('api key expired') || lower.includes('key has been revoked') || lower.includes('leaked')) {
-                return res.status(401).json({ error: { message: 'API key của bạn không còn hợp lệ (expired/leaked). Vui lòng tạo key mới trong Google AI Studio và cập nhật .env.' } });
+            // Nếu key bị lỗi, trả về mã 401
+            if (lower.includes('api key') || lower.includes('unauthorized') || lower.includes('expired')) {
+                return res.status(401).json({ error: { message: 'API key của bạn không hợp lệ. Vui lòng kiểm tra lại GROQ_API_KEY trong .env.' } });
             }
 
             return res.status(response.status).json({ error: { message: rawMessage } });
         }
 
         const data = await response.json();
-        const textResponse = data.candidates[0].content.parts[0].text;
+        const textResponse = data.choices[0].message.content;
         let jsonString = textResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
 
         try {

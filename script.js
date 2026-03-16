@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const customAudienceContainer = document.getElementById('custom-audience-container');
     const customAudienceInput = document.getElementById('custom-audience-input');
 
+    // (AI Provider và custom API key selectors đã được loại bỏ)
+
     // UI Steps & Inputs
     const steps = [
         { 
@@ -428,6 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = steps[3].element.value + 's';
         const actors = steps[4].element.value + ' người';
         const style = getSelectedStyles().join(', ');
+        
+        // Các thiết lập cấu hình AI đã được chuyển sang handled tại BE
 
         const now = Date.now();
         if (isSubmitting || now - lastSubmitTime < 3000) {
@@ -489,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         while (attempt <= maxRetries) {
             try {
                 console.log('Đang gọi API...');
-                const response = await fetch('/api/chat', {
+                const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
