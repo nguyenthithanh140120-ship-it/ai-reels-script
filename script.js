@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submit-btn');
     const btnText = submitBtn.querySelector('.btn-text');
     const loader = submitBtn.querySelector('.loader');
-    
+
     // Result Elements
     const resultSection = document.getElementById('result-section');
     const hookContent = document.getElementById('hook-content');
@@ -29,25 +29,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // UI Steps & Inputs
     const steps = [
-        { 
-            stepNum: 1, 
-            id: 'product', 
+        {
+            stepNum: 1,
+            id: 'product',
             element: document.getElementById('product'),
             validate: (val) => val.trim().length > 0,
             errId: 'error-product',
             errMsg: 'Vui lòng nhập sản phẩm/dịch vụ'
         },
-        { 
-            stepNum: 2, 
-            id: 'message', 
+        {
+            stepNum: 2,
+            id: 'message',
             element: document.getElementById('message'),
             validate: (val) => val.trim().length > 0,
             errId: 'error-message',
             errMsg: 'Vui lòng nhập thông điệp'
         },
-        { 
-            stepNum: 3, 
-            id: 'audience', 
+        {
+            stepNum: 3,
+            id: 'audience',
             element: document.getElementById('audience-group'),
             validate: () => {
                 const audiences = getSelectedAudiences();
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     steps[2].errMsg = 'Vui lòng chọn ít nhất 1 đối tượng khán giả';
                     return false;
                 }
-                
+
                 if (audienceOtherCheckbox.checked) {
                     const customVal = customAudienceInput.value.trim();
                     if (!customVal) {
@@ -73,30 +73,30 @@ document.addEventListener('DOMContentLoaded', () => {
             errId: 'error-audience',
             errMsg: 'Vui lòng chọn ít nhất 1 đối tượng khán giả'
         },
-        { 
-            stepNum: 4, 
-            id: 'duration', 
+        {
+            stepNum: 4,
+            id: 'duration',
             element: document.getElementById('duration'),
             validate: (val) => val !== '' && !isNaN(val) && Number(val) >= 5 && Number(val) <= 600,
             errId: 'error-duration',
             errMsg: 'Thời lượng phải từ 5 đến 600 giây theo tiêu chuẩn TikTok'
         },
-        { 
-            stepNum: 5, 
-            id: 'actors', 
+        {
+            stepNum: 5,
+            id: 'actors',
             element: document.getElementById('actors'),
             validate: (val) => val !== '' && !isNaN(val) && Number.isInteger(Number(val)),
             errId: 'error-actors',
             errMsg: 'Số lượng diễn viên phải là số'
         },
-        { 
-            stepNum: 6, 
+        {
+            stepNum: 6,
             id: 'style',
             element: document.getElementById('style-group'), // Parent container for checkboxes
             validate: () => {
                 const styles = getSelectedStyles();
                 if (styles.length === 0 && !styleOtherCheckbox.checked) return false;
-                
+
                 if (styleOtherCheckbox.checked) {
                     const customVal = customStyleInput.value.trim();
                     if (!customVal) {
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const styleCheckboxes = document.querySelectorAll('input[name="style"]');
     const audienceCheckboxes = document.querySelectorAll('input[name="audience"]');
     const presetBtns = document.querySelectorAll('.preset-btn');
-    
+
     // Validation State Tracking
     let currentValidStep = 0; // 0 to 5
     let isSubmitting = false; // Throttling state
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         presetBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const isValidBefore = enforceSequentialFocus(4, e);
-                if(isValidBefore) {
+                if (isValidBefore) {
                     const val = btn.getAttribute('data-val');
                     steps[4].element.value = val;
                     handleInputChange(4);
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function showInputError(stepIndex, customMsg = null) {
         const step = steps[stepIndex];
-        
+
         // Handle special custom style case
         if (step.id === 'style' && styleOtherCheckbox.checked && !customStyleInput.value.trim()) {
             const customErrorEl = document.getElementById('error-custom-style');
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customErrorEl.classList.remove('hidden');
             customStyleInput.classList.add('is-invalid');
             customStyleInput.classList.remove('is-valid');
-            
+
             // hide main style error to avoid duplicate messages
             document.getElementById(step.errId).classList.add('hidden');
             return;
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customErrorEl.classList.remove('hidden');
             customAudienceInput.classList.add('is-invalid');
             customAudienceInput.classList.remove('is-valid');
-            
+
             document.getElementById(step.errId).classList.add('hidden');
             return;
         }
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const errorEl = document.getElementById(step.errId);
         errorEl.textContent = customMsg || step.errMsg;
         errorEl.classList.remove('hidden');
-        
+
         if (step.id !== 'style' && step.id !== 'audience') {
             step.element.classList.add('is-invalid');
             step.element.classList.remove('is-valid');
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function clearInputError(stepIndex) {
         const step = steps[stepIndex];
-        
+
         if (step.id === 'style') {
             document.getElementById('error-custom-style').classList.add('hidden');
             customStyleInput.classList.remove('is-invalid');
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const errorEl = document.getElementById(step.errId);
         errorEl.classList.add('hidden');
-        
+
         if (step.id !== 'style' && step.id !== 'audience') {
             step.element.classList.remove('is-invalid');
             step.element.classList.add('is-valid');
@@ -339,24 +339,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const step = steps[i];
             const val = (step.id === 'style' || step.id === 'audience') ? null : step.element.value;
             const isValid = step.validate(val);
-            
+
             if (!isValid) {
                 // Prevent check/click if it's checkbox or button
-                if(event && event.preventDefault) event.preventDefault();
-                
+                if (event && event.preventDefault) event.preventDefault();
+
                 // Show tooltip message
                 showInputError(i, 'Vui lòng hoàn thành trường này trước khi tiếp tục');
-                
+
                 // Blur current, focus the invalid one smoothly
                 setTimeout(() => {
-                    if(document.activeElement) document.activeElement.blur();
-                    if(step.id !== 'style' && step.id !== 'audience') {
+                    if (document.activeElement) document.activeElement.blur();
+                    if (step.id !== 'style' && step.id !== 'audience') {
                         step.element.focus();
                         // Scroll slightly to view 
                         step.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 }, 10);
-                
+
                 return false;
             }
         }
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function updateProgress() {
         let validStepsCount = 0;
-        
+
         steps.forEach((step, i) => {
             const val = (step.id === 'style' || step.id === 'audience') ? null : step.element.value;
             const isValid = step.validate(val);
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Điểm dừng hợp lệ lớn nhất
         currentValidStep = validStepsCount;
-        
+
         // Enable / Disable Submit
         submitBtn.disabled = validStepsCount !== 6;
     }
@@ -406,15 +406,15 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function handleFormSubmit(e) {
         e.preventDefault();
-        
+
         // Final Double Check Validation
         let allValid = true;
         for (let i = 0; i < steps.length; i++) {
             const val = (steps[i].id === 'style' || steps[i].id === 'audience') ? null : steps[i].element.value;
-            if(!steps[i].validate(val)) {
+            if (!steps[i].validate(val)) {
                 showInputError(i);
                 allValid = false;
-                if(steps[i].id !== 'style' && steps[i].id !== 'audience') steps[i].element.focus();
+                if (steps[i].id !== 'style' && steps[i].id !== 'audience') steps[i].element.focus();
                 else if (steps[i].id === 'style' && styleOtherCheckbox.checked) customStyleInput.focus();
                 else if (steps[i].id === 'audience' && audienceOtherCheckbox.checked) customAudienceInput.focus();
                 break;
@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = steps[3].element.value + 's';
         const actors = steps[4].element.value + ' người';
         const style = getSelectedStyles().join(', ');
-        
+
         // Các thiết lập cấu hình AI đã được chuyển sang handled tại BE
 
         const now = Date.now();
@@ -538,14 +538,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     throw new Error(errorMsg);
                 }
-
                 const result = await response.json();
                 return result;
 
             } catch (err) {
                 // If it's the last attempt, or it's not a quota error handled inside the loop, throw it.
                 if (attempt >= maxRetries || !err.message.includes('Quota')) {
-                    throw err; 
+                    throw err;
                 }
             }
         }
@@ -563,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
         blocks.forEach(b => b.style.opacity = '0'); // Reset opacity
 
         // Hook
-        if(data.hook) hookContent.innerHTML = `<p>🚀 <strong>${data.hook}</strong></p>`;
+        if (data.hook) hookContent.innerHTML = `<p>🚀 <strong>${data.hook}</strong></p>`;
 
         // Timeline (Scene, Visual, Dialogue)
         if (data.timeline && data.timeline.length > 0) {
@@ -581,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Hashtags
         if (data.hashtags) data.hashtags.forEach(h => {
-            const s = document.createElement('span'); s.className = 'hashtag'; s.textContent = h.startsWith('#')?h:`#${h}`; hashtagList.appendChild(s);
+            const s = document.createElement('span'); s.className = 'hashtag'; s.textContent = h.startsWith('#') ? h : `#${h}`; hashtagList.appendChild(s);
         });
 
         // BGM
@@ -610,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ĐẶT HÀM COPY RA GLOBAL ĐỂ GỌI TỪ OUTSIDE (ONCLICK EVENT HTML) ---
-    window.copyBlock = function(containerId, btnElement) {
+    window.copyBlock = function (containerId, btnElement) {
         const container = document.getElementById(containerId);
         let textToCopy = '';
 
@@ -623,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cells = row.querySelectorAll('td');
                 if (cells.length === 3) textToCopy += `[${cells[0].innerText}]\n- Bối cảnh: ${cells[1].innerText}\n- Lời thoại: ${cells[2].innerText}\n\n`;
             });
-        } 
+        }
         // Xử lý Caption Container chứa List & Hashtags
         else if (containerId === 'caption-container') {
             const caps = container.querySelectorAll('.caption-item');
@@ -638,11 +637,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Thực hiện lệnh Copy
         navigator.clipboard.writeText(textToCopy).then(() => {
             const originalText = btnElement.textContent;
-            btnElement.textContent = '✔️ Đã Copy'; 
+            btnElement.textContent = '✔️ Đã Copy';
             btnElement.classList.add('copied');
-            setTimeout(() => { 
-                btnElement.textContent = originalText; 
-                btnElement.classList.remove('copied'); 
+            setTimeout(() => {
+                btnElement.textContent = originalText;
+                btnElement.classList.remove('copied');
             }, 2000);
         });
     }

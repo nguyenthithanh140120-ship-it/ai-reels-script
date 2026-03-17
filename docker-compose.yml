@@ -1,12 +1,8 @@
-version: '3.8'
-
 services:
   web:
     build: .
     ports:
-      - "8080:8080"
+      - "9999:8080"
     env_file:
       - .env
-    environment:
-      - GROQ_API_KEY=${GROQ_API_KEY}
     restart: always

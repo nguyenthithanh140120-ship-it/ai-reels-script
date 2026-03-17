@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy package.json và cài đặt dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --production
 
 # Copy toàn bộ mã nguồn
 COPY . .

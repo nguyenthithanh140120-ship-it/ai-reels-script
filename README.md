@@ -25,7 +25,7 @@ Do ứng dụng gọi API qua Server Backend (để bảo mật API Key tránh l
    npm install
    npm start
    ```
-4. Khi chạy xong, mở trình duyệt web truy cập: **`http://localhost:8080/index.html`**
+4. Khi chạy xong, mở trình duyệt web truy cập: **`http://localhost:9999/index.html`**
 
 *(Chú ý: Không dùng tính năng Live Server hay mở file HTML trực tiếp được nữa, vì chúng không thể chạy code API của Server.)*
 
@@ -39,7 +39,7 @@ Dự án đã cấu hình đầy đủ để đóng gói toàn bộ Frontend và
    ```bash
    docker-compose up -d --build
    ```
-4. Mở trình duyệt và truy cập vào địa chỉ: **`http://localhost:8080`** 
+4. Mở trình duyệt và truy cập vào địa chỉ: **`http://localhost:9999`** 
 
 **Cách Tắt/Dừng Docker Container:**
 ```bash
