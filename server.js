@@ -48,11 +48,11 @@ app.post('/api/chat', async (req, res) => {
         1. HOOK (0-3s) - "PHẢI GIẬT GÂN":
         - Sử dụng các kỹ thuật: "Phủ định sự thật", "Nêu con số gây sốc" hoặc "Đánh vào nỗi sợ thầm kín". 
         - Ví dụ: "Dừng ngay việc [X] nếu bạn không muốn [Y]..." hoặc "Tại sao 90% người dùng [X] đều thất bại?".
-
-        2. NHẠC NỀN (BGM) - "PHẢI CỤ THỂ":
-        - Phải nêu tên chính xác ít nhất 2 bài hát đang trending hoặc phù hợp nhất (Ví dụ: "Flowers - Miley Cyrus", "Stay - Justin Bieber", hoặc nhạc không lời như "Simple Gift").
-        - Phải mô tả nhịp điệu nhạc (Fast beat cho năng động, Slow reverb cho sâu sắc).
-
+        2. NHẠC NỀN (BGM) - "PHẢI BẮT TREND & ĐÚNG MOOD":
+        - Đề xuất chính xác tên 2-3 bài hát đang Viral trên TikTok/Reels hoặc các bản nhạc không lời (Phonk, Lofi, Cinematic) phù hợp nhất với phong cách ${style}.
+        - Cấu trúc mỗi bài phải gồm: [Tên bài hát - Nghệ sĩ] + [Mood: ví dụ Sang trọng, Năng động, Bí ẩn].
+        - Chỉ dẫn kỹ thuật: Mô tả chi tiết điểm "Drop" hoặc "Chuyển cảnh" theo nhạc (Ví dụ: "Sử dụng đoạn cao trào từ giây thứ 15 để khớp với cảnh hiện sản phẩm").
+        - Âm thanh bổ trợ (SFX): Gợi ý thêm các tiếng động như "Whoosh", "Glitch", hoặc "Tiếng tiền rơi" để tăng tính sinh động cho video.
         3. KÊU GỌI HÀNH ĐỘNG (CTA) - "TẠO CỘNG ĐỒNG":
         - Không dùng "Hãy mua ngay". 
         - Sử dụng các câu kêu gọi xây dựng cộng đồng như: "Tag ngay đứa bạn thân vào để cùng học", "Comment [Từ khóa] để mình gửi tài liệu bí mật", hoặc "Lưu lại ngay vì chắc chắn bạn sẽ cần dùng đến".
